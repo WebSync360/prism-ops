@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Background: Your Off-white/Greyish (#DCDAD9) */
+    --background: 225 3% 86%; 
+    --foreground: 222 47% 11%; /* Navy #141E30 for text */
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    /* Brand Primary: The Navy Accent (#35577D) */
+    --primary: 213 40% 35%;
+    --primary-foreground: 210 40% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 222 47% 11%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Background: Your Deep Navy (#141E30) */
+    --background: 222 47% 11%;
+    --foreground: 225 3% 86%; /* Text: Off-white #DCDAD9 */
+
+    /* Card: Your Charcoal Gray (#1C1E24) */
+    --card: 225 12% 12%;
+    --card-foreground: 225 3% 86%;
+
+    --primary: 213 40% 35%; /* #35577D */
+    --primary-foreground: 210 40% 98%;
+
+    /* Alert: Your Deep Crimson (#6B1E23) */
+    --destructive: 356 56% 27%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 222 47% 20%;
+    --ring: 213 40% 35%;
+  }
+}
