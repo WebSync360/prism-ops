@@ -1,42 +1,32 @@
 import { useEffect, useState } from 'react'
-import { Navigate, useLocation } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<any>(null)
-  const location = useLocation()
+  const [session, setSession] = useState<any>(null)
 
   useEffect(() => {
-    // 1. Check current session
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setUser(session?.user ?? null)
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
       setLoading(false)
-    }
+    })
 
-    checkUser()
-
-    // 2. Listen for sign-in/sign-out events
+    // Listen for changes (Sign in / Sign out)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      setSession(session)
       setLoading(false)
     })
 
     return () => subscription.unsubscribe()
   }, [])
 
-  if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-[#141E30] text-white">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#35577D]"></div>
-      </div>
-    )
-  }
+  if (loading) return <div className="h-screen bg-[#141E30] flex items-center justify-center text-white text-xl">Initializing...</div>
 
-  // If no user, send them to login but remember where they were trying to go
-  if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />
+  // If NO session exists, go to login
+  if (!session) {
+    return <Navigate to="/login" replace />
   }
 
   return <>{children}</>
