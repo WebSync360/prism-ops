@@ -13,22 +13,28 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    
-    const { error } = isSignUp 
-      ? await supabase.auth.signUp({ email, password })
-      : await supabase.auth.signInWithPassword({ email, password })
+const handleAuth = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setLoading(true)
+  
+  const { data, error } = isSignUp 
+    ? await supabase.auth.signUp({ email, password })
+    : await supabase.auth.signInWithPassword({ email, password })
 
-    if (error) {
-      alert(error.message)
+  console.log("Auth Response:", { data, error }) // <--- ADD THIS
+
+  if (error) {
+    alert(error.message)
+  } else {
+    // If sign up worked but session is null, it means email confirmation is still ON
+    if (isSignUp && !data.session) {
+      alert('Check your email to confirm your account!')
     } else {
-      if (isSignUp) alert('Account created! You can now log in.')
       navigate('/dashboard')
     }
-    setLoading(false)
   }
+  setLoading(false)
+}
 
   const handleGoogleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
