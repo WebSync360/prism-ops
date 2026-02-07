@@ -7,7 +7,7 @@ const menuItems = [
   // Changing path to /daily-snapshot to match App.tsx
   { icon: ClipboardCheck, label: 'Daily Snapshot', path: '/daily-snapshot' },
   // Keep these for future expansion or leave as placeholders
-  { icon: Users, label: 'Clients', path: '/dashboard' }, 
+  { icon: Users, label: 'Clients', path: '/dashboard/clients' }, 
   { icon: Settings, label: 'Settings', path: '/settings' },
 ]
 
