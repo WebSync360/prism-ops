@@ -25,7 +25,7 @@ export default function StageHeatmap({ clients }: { clients: any[] }) {
             </div>
             {/* Minimalist GitHub-style progress blocks */}
             <div className="flex gap-1">
-              {[1, 2, 3].map((i) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                 <div 
                   key={i} 
                   className={`w-1.5 h-6 rounded-full ${i <= count ? s.bg.replace('/10', '/40') : 'bg-gray-800/30'}`} 
