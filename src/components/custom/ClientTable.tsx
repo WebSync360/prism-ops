@@ -18,10 +18,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, Loader2, Calendar } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { MoreHorizontal, Loader2, Phone, Search, Archive, CheckCircle2, AlertCircle } from "lucide-react"
 
 export default function ClientTable() {
   const [clients, setClients] = useState<any[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
 
@@ -43,115 +45,134 @@ export default function ClientTable() {
 
     if (!error) {
       setClients(clients.map(c => c.id === id ? { ...c, status: newStatus } : c))
-      // Notify dashboard to refresh metric cards
       window.dispatchEvent(new Event('refresh-metrics'))
     }
     setUpdatingId(null)
   }
 
   const deleteClient = async (id: string) => {
-    if (!confirm("Are you sure? This will permanently remove this client from your records.")) return
+    if (!confirm("Are you sure? This will permanently remove this client.")) return
 
-    const { error } = await supabase
-      .from('clients')
-      .delete()
-      .eq('id', id)
+    const { error } = await supabase.from('clients').delete().eq('id', id)
 
     if (!error) {
       setClients(clients.filter(c => c.id !== id))
       window.dispatchEvent(new Event('refresh-metrics'))
-    } else {
-      alert("Error deleting client: " + error.message)
     }
   }
 
   useEffect(() => {
     fetchClients()
+    // Listen for additions from the popup
+    const handleRefresh = () => fetchClients()
+    window.addEventListener('refresh-metrics', handleRefresh)
+    return () => window.removeEventListener('refresh-metrics', handleRefresh)
   }, [])
 
-  if (loading) return <div className="text-gray-500 animate-pulse py-10 text-center">Loading encrypted data stream...</div>
+  // 🕵️‍♂️ Search Logic: Filter by name or email
+  const filteredClients = clients.filter(c => 
+    c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    c.email.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  if (loading) return <div className="text-gray-500 animate-pulse py-10 text-center italic">Syncing spreadsheet data...</div>
 
   return (
-    <div className="rounded-md border border-gray-800 bg-[#1C1E24]">
-      <Table>
-        <TableHeader>
-          <TableRow className="border-gray-800 hover:bg-transparent">
-            <TableHead className="text-gray-400">Client Info</TableHead>
-            <TableHead className="text-gray-400">Status</TableHead>
-            <TableHead className="text-gray-400">Joined</TableHead>
-            <TableHead className="text-gray-400 text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {clients.map((client) => (
-            <TableRow key={client.id} className="border-gray-800 hover:bg-[#141E30] transition-colors">
-              <TableCell className="font-medium text-white">
-                <div className="text-sm font-semibold">{client.name}</div>
-                <div className="text-xs text-gray-500">{client.email}</div>
-              </TableCell>
-              <TableCell>
-                {updatingId === client.id ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-                ) : (
-                  <Badge className={
-                    client.status === 'Completed' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                    client.status === 'Blocked' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
-                    'bg-blue-500/10 text-blue-500 border-blue-500/20'
-                  }>
-                    {client.status}
+    <div className="space-y-4">
+      {/* 🔍 SEARCH BAR */}
+      <div className="relative group max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#35577D] transition-colors" size={16} />
+        <Input 
+          placeholder="Quick search (name or email)..." 
+          className="bg-[#1C1E24] border-gray-800 pl-10 text-white focus:border-[#35577D] transition-all"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      {/* 📊 SPREADSHEET TABLE */}
+      <div className="rounded-xl border border-gray-800 bg-[#1C1E24] overflow-hidden shadow-2xl">
+        <Table>
+          <TableHeader className="bg-[#141E30]/50">
+            <TableRow className="border-gray-800 hover:bg-transparent">
+              <TableHead className="text-gray-500 font-bold uppercase text-[10px] tracking-widest">Client Identity</TableHead>
+              <TableHead className="text-gray-500 font-bold uppercase text-[10px] tracking-widest">Contact Point</TableHead>
+              <TableHead className="text-gray-500 font-bold uppercase text-[10px] tracking-widest">Onboarding Stage</TableHead>
+              <TableHead className="text-gray-500 font-bold uppercase text-[10px] tracking-widest">Status</TableHead>
+              <TableHead className="text-right text-gray-500 font-bold uppercase text-[10px] tracking-widest">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredClients.map((client) => (
+              <TableRow key={client.id} className="border-gray-800 hover:bg-[#141E30]/80 transition-colors">
+                <TableCell>
+                  <div className="font-semibold text-white tracking-tight">{client.name}</div>
+                  <div className="text-[10px] text-gray-500 flex items-center gap-1 mt-0.5">
+                     UID: {client.id.slice(0, 8)}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm text-gray-300">{client.email}</div>
+                  <div className="text-[11px] text-gray-500 flex items-center gap-1 mt-1 font-mono">
+                    <Phone size={10} className="text-[#35577D]" /> {client.phone || '--'}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="secondary" className="bg-[#35577D]/10 text-[#64B5F6] border-[#35577D]/30 text-[10px] uppercase font-bold px-2 py-0">
+                    {client.onboarding_stage || 'Docs'}
                   </Badge>
-                )}
-              </TableCell>
-              <TableCell className="text-gray-500 text-xs">
-                <div className="flex items-center gap-1">
-                  <Calendar size={12} />
-                  {new Date(client.created_at).toLocaleDateString(undefined, {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                  })}
-                </div>
-              </TableCell>
-              <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-800">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-[#1C1E24] border-gray-800 text-white shadow-2xl">
-                    <DropdownMenuLabel className="text-gray-400 text-xs">Management</DropdownMenuLabel>
-                    <DropdownMenuSeparator className="bg-gray-800" />
-                    <DropdownMenuItem onClick={() => updateStatus(client.id, 'In Progress')}>
-                      Mark: In Progress
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => updateStatus(client.id, 'Blocked')} className="text-red-400">
-                      Mark: Blocked
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => updateStatus(client.id, 'Completed')} className="text-green-400">
-                      Mark: Completed
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-gray-800" />
-                    <DropdownMenuItem 
-                      onClick={() => deleteClient(client.id)}
-                      className="text-red-600 focus:bg-red-600/10 focus:text-red-500"
-                    >
-                      Delete Permanently
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
-          {clients.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={4} className="text-center py-12 text-gray-600 italic">
-                No clients in the pipeline. Use the "Add Client" button to begin.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+                </TableCell>
+                <TableCell>
+                  {updatingId === client.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-[#35577D]" />
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${
+                        client.status === 'Completed' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' :
+                        client.status === 'Blocked' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' :
+                        'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]'
+                      }`} />
+                      <span className="text-xs text-white">{client.status}</span>
+                    </div>
+                  )}
+                </TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0 text-gray-500 hover:text-white hover:bg-gray-800">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-[#1C1E24] border-gray-800 text-white shadow-2xl">
+                      <DropdownMenuLabel className="text-gray-400 text-[10px] uppercase tracking-widest">Update Lifecycle</DropdownMenuLabel>
+                      <DropdownMenuSeparator className="bg-gray-800" />
+                      <DropdownMenuItem onClick={() => updateStatus(client.id, 'In Progress')} className="gap-2">
+                        <Loader2 size={14} className="text-blue-500" /> Mark: In Progress
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => updateStatus(client.id, 'Blocked')} className="gap-2 text-red-400">
+                        <AlertCircle size={14} className="text-red-500" /> Mark: Blocked
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => updateStatus(client.id, 'Completed')} className="gap-2 text-green-400">
+                        <CheckCircle2 size={14} className="text-green-500" /> Mark: Completed
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-gray-800" />
+                      <DropdownMenuItem onClick={() => deleteClient(client.id)} className="gap-2 text-red-600 focus:bg-red-950 focus:text-red-400">
+                        <Archive size={14} /> Archive Forever
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        
+        {filteredClients.length === 0 && (
+          <div className="text-center py-20 bg-[#1C1E24]">
+             <p className="text-gray-600 text-sm italic">No entries match your search criteria.</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
