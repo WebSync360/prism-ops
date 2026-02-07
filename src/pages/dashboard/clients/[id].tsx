@@ -1,6 +1,4 @@
-"use client" // Add this if you are using the App Router
-
-import { useParams } from 'next/navigation' 
+import { useRouter } from 'next/router' // Use router, not navigation
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import DashboardLayout from '@/layouts/DashboardLayout'
@@ -13,15 +11,16 @@ import Link from 'next/link'
 import { Badge } from "@/components/ui/badge"
 
 export default function ClientProfile() {
-  const params = useParams()
-  const id = params?.id 
+  const router = useRouter()
+  const { id } = router.query // Next.js Pages router automatically populates this from the filename [id].tsx
   
   const [client, setClient] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (id) {
+    // router.isReady ensures the 'id' isn't undefined on first render
+    if (router.isReady && id) {
       const fetchClient = async () => {
         const { data } = await supabase.from('clients').select('*').eq('id', id).single()
         if (data) setClient(data)
@@ -29,7 +28,7 @@ export default function ClientProfile() {
       }
       fetchClient()
     }
-  }, [id])
+  }, [id, router.isReady])
 
   const updateClientStatus = async (newStatus: string) => {
     setSaving(true)
@@ -40,6 +39,7 @@ export default function ClientProfile() {
 
     if (!error) {
       setClient({ ...client, status: newStatus })
+      // Custom event to update the main dashboard heatmap/metrics
       window.dispatchEvent(new Event('refresh-metrics'))
     }
     setSaving(false)
@@ -47,115 +47,115 @@ export default function ClientProfile() {
 
   if (loading) return (
     <DashboardLayout>
-      <div className="p-20 text-center text-gray-500 animate-pulse font-mono tracking-widest">
-        DECRYPTING CLIENT DATA...
+      <div className="p-20 text-center text-gray-500 animate-pulse font-mono tracking-[0.3em] text-xs">
+        DECRYPTING_CLIENT_DATA...
       </div>
     </DashboardLayout>
   )
 
-  if (!client) return <div className="p-20 text-center text-red-500">Client not found.</div>
+  if (!client) return (
+    <DashboardLayout>
+      <div className="p-20 text-center text-red-400 font-mono text-sm">
+        [ERROR] CLIENT_NOT_FOUND_IN_DATABASE
+      </div>
+    </DashboardLayout>
+  )
 
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
         
-        {/* TOP NAVIGATION */}
         <Link href="/dashboard">
-          <Button variant="ghost" className="text-gray-400 hover:text-white hover:bg-gray-800/50 gap-2 p-0 px-2 transition-all">
-            <ArrowLeft size={16} /> Back to Command Center
+          <Button variant="ghost" className="text-gray-500 hover:text-white hover:bg-white/5 gap-2 p-0 px-3 transition-all rounded-full border border-transparent hover:border-gray-800">
+            <ArrowLeft size={14} /> Return to Intelligence
           </Button>
         </Link>
 
-        {/* PROFILE HEADER CARD */}
-        <div className="bg-[#1C1E24] border border-gray-800 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
-          {/* Subtle Accent Glow */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[50px]" />
+        <div className="bg-[#1C1E24] border border-gray-800 rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
+          {/* Visual ID Background Glow */}
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-600/10 blur-[100px] pointer-events-none" />
           
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-800 pb-8 gap-6 relative z-10">
-            <div className="flex items-center gap-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-[#141E30] to-[#243B55] rounded-2xl flex items-center justify-center border border-gray-700 shadow-inner">
-                <User size={36} className="text-blue-400" />
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-800/50 pb-10 gap-8 relative z-10">
+            <div className="flex items-center gap-8">
+              <div className="w-24 h-24 bg-[#141E30] rounded-[2rem] flex items-center justify-center border border-gray-700 shadow-2xl">
+                <User size={40} className="text-blue-500" />
               </div>
               <div>
-                <h1 className="text-4xl font-black text-white tracking-tighter">{client.name}</h1>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge variant="outline" className="bg-blue-500/5 text-blue-400 border-blue-500/20 font-mono text-[10px]">
-                    {client.onboarding_stage || 'DOCS'}
+                <h1 className="text-5xl font-black text-white tracking-tighter mb-2">{client.name}</h1>
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className="bg-blue-500/5 text-blue-400 border-blue-500/20 font-mono text-[10px] px-3">
+                    {client.onboarding_stage || 'PENDING'}
                   </Badge>
-                  <span className="text-gray-600 text-xs">ID: {client.id.slice(0, 8)}</span>
+                  <span className="text-gray-600 font-mono text-[10px] tracking-tighter uppercase">Reference: {client.id.slice(0, 12)}</span>
                 </div>
               </div>
             </div>
 
-            {/* QUICK STATUS ACTIONS */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 p-1 bg-black/20 rounded-2xl border border-gray-800/50">
               {['In Progress', 'Blocked', 'Completed'].map((status) => (
                 <Button
                   key={status}
                   size="sm"
-                  variant={client.status === status ? "default" : "outline"}
+                  variant="ghost"
                   onClick={() => updateClientStatus(status)}
                   disabled={saving}
-                  className={`rounded-full text-xs font-bold transition-all ${
+                  className={`rounded-xl text-[11px] font-bold px-4 transition-all ${
                     client.status === status 
-                      ? status === 'Completed' ? 'bg-green-600 hover:bg-green-700' :
-                        status === 'Blocked' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600'
-                      : 'border-gray-800 text-gray-400 hover:text-white'
+                      ? status === 'Completed' ? 'bg-green-500/10 text-green-500' :
+                        status === 'Blocked' ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-400'
+                      : 'text-gray-500 hover:text-gray-300'
                   }`}
                 >
-                  {saving && client.status === status ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}
+                  {saving && client.status === status && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
                   {status}
                 </Button>
               ))}
             </div>
           </div>
 
-          {/* INFORMATION GRID */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 mt-10 relative z-10">
-            
-            {/* LEFT: DATA LIST */}
-            <div className="lg:col-span-2 space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-16 mt-12 relative z-10">
+            <div className="lg:col-span-2 space-y-10">
               <div>
-                <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Contact Intelligence</h3>
-                <div className="space-y-5">
+                <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.25em] mb-6">Database Metadata</h3>
+                <div className="space-y-6">
                   <div className="group">
-                    <p className="text-[10px] text-gray-600 uppercase font-bold mb-1">Email Address</p>
-                    <div className="flex items-center gap-3 text-gray-200 group-hover:text-blue-400 transition-colors">
+                    <p className="text-[10px] text-gray-600 uppercase font-black mb-1.5">Primary Email</p>
+                    <div className="flex items-center gap-3 text-gray-200 font-medium truncate">
                       <Mail size={16} className="text-gray-700" /> {client.email}
                     </div>
                   </div>
                   <div className="group">
-                    <p className="text-[10px] text-gray-600 uppercase font-bold mb-1">Direct Line</p>
-                    <div className="flex items-center gap-3 text-gray-200 group-hover:text-blue-400 transition-colors font-mono">
-                      <Phone size={16} className="text-gray-700" /> {client.phone || 'NO RECORD'}
+                    <p className="text-[10px] text-gray-600 uppercase font-black mb-1.5">Direct Line</p>
+                    <div className="flex items-center gap-3 text-gray-200 font-mono text-sm tracking-tight">
+                      <Phone size={16} className="text-gray-700" /> {client.phone || 'UNAVAILABLE'}
                     </div>
                   </div>
                   <div className="group">
-                    <p className="text-[10px] text-gray-600 uppercase font-bold mb-1">Lifecycle Start</p>
-                    <div className="flex items-center gap-3 text-gray-400">
+                    <p className="text-[10px] text-gray-600 uppercase font-black mb-1.5">Origin Date</p>
+                    <div className="flex items-center gap-3 text-gray-400 font-medium">
                       <Calendar size={16} className="text-gray-700" /> 
-                      {new Date(client.created_at).toLocaleDateString(undefined, { dateStyle: 'long' })}
+                      {new Date(client.created_at).toLocaleDateString(undefined, { dateStyle: 'full' })}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* RIGHT: SCRATCHPAD / NOTES */}
-            <div className="lg:col-span-3">
-              <div className="bg-[#141E30]/50 rounded-2xl border border-gray-800 p-6 flex flex-col h-full ring-1 ring-white/5">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Strategy Notes</h3>
-                  <Save size={14} className="text-gray-600" />
+            <div className="lg:col-span-3 h-full">
+              <div className="bg-black/20 rounded-[2rem] border border-gray-800 p-8 flex flex-col h-full shadow-inner ring-1 ring-white/5 group">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Session Notes</h3>
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                     <span className="text-[9px] text-gray-600 font-mono">AUTOSAVE_ACTIVE</span>
+                     <Save size={12} className="text-blue-500" />
+                  </div>
                 </div>
                 <textarea 
-                  className="w-full bg-transparent border-none text-gray-300 text-sm focus:ring-0 resize-none h-40 scrollbar-hide"
-                  placeholder="Draft internal strategy, blockers, or next steps here..."
+                  className="w-full bg-transparent border-none text-gray-300 text-sm focus:ring-0 resize-none h-48 leading-relaxed scrollbar-hide"
+                  placeholder="Draft encrypted intelligence or deployment notes here..."
                 />
-                <p className="text-[9px] text-gray-600 text-right mt-2 italic">Notes auto-save to local session</p>
               </div>
             </div>
-
           </div>
         </div>
       </div>

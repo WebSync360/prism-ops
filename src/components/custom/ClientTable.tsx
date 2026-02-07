@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import Link from 'next/link' // <--- Crucial for navigation
+import Link from 'next/link' 
 import {
   Table,
   TableBody,
@@ -20,7 +20,10 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { MoreHorizontal, Loader2, Phone, Search, Archive, CheckCircle2, AlertCircle, ExternalLink } from "lucide-react"
+import { 
+  MoreHorizontal, Loader2, Phone, Search, 
+  Archive, CheckCircle2, AlertCircle, ExternalLink, User 
+} from "lucide-react"
 
 export default function ClientTable() {
   const [clients, setClients] = useState<any[]>([])
@@ -72,102 +75,107 @@ export default function ClientTable() {
     c.email.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  if (loading) return <div className="text-gray-500 animate-pulse py-10 text-center italic">Syncing spreadsheet data...</div>
+  if (loading) return <div className="text-gray-500 animate-pulse py-10 text-center italic font-mono uppercase tracking-widest text-xs">Accessing encrypted ledger...</div>
 
   return (
     <div className="space-y-4">
       <div className="relative group max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#35577D] transition-colors" size={16} />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-500 transition-colors" size={16} />
         <Input 
-          placeholder="Quick search (name or email)..." 
-          className="bg-[#1C1E24] border-gray-800 pl-10 text-white focus:border-[#35577D] transition-all"
+          placeholder="Filter by identity or endpoint..." 
+          className="bg-[#1C1E24] border-gray-800 pl-10 text-white focus:ring-1 focus:ring-blue-500 transition-all"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <div className="rounded-xl border border-gray-800 bg-[#1C1E24] overflow-hidden shadow-2xl">
+      <div className="rounded-2xl border border-gray-800 bg-[#1C1E24] overflow-hidden shadow-2xl">
         <Table>
           <TableHeader className="bg-[#141E30]/50">
             <TableRow className="border-gray-800 hover:bg-transparent">
-              <TableHead className="text-gray-500 font-bold uppercase text-[10px] tracking-widest">Client Identity</TableHead>
-              <TableHead className="text-gray-500 font-bold uppercase text-[10px] tracking-widest">Contact Point</TableHead>
-              <TableHead className="text-gray-500 font-bold uppercase text-[10px] tracking-widest">Onboarding Stage</TableHead>
-              <TableHead className="text-gray-500 font-bold uppercase text-[10px] tracking-widest">Status</TableHead>
-              <TableHead className="text-right text-gray-500 font-bold uppercase text-[10px] tracking-widest">Action</TableHead>
+              <TableHead className="text-gray-500 font-bold uppercase text-[10px] tracking-[0.2em] py-5">Client Identity</TableHead>
+              <TableHead className="text-gray-500 font-bold uppercase text-[10px] tracking-[0.2em]">Contact Point</TableHead>
+              <TableHead className="text-gray-500 font-bold uppercase text-[10px] tracking-[0.2em]">Flow Stage</TableHead>
+              <TableHead className="text-gray-500 font-bold uppercase text-[10px] tracking-[0.2em]">Status</TableHead>
+              <TableHead className="text-right text-gray-500 font-bold uppercase text-[10px] tracking-[0.2em] pr-6">Commands</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredClients.map((client) => (
               <TableRow key={client.id} className="border-gray-800 hover:bg-[#141E30]/80 transition-colors group/row">
-                <TableCell>
-                  {/* WRAPPED IN LINK TO PROFILE PAGE */}
-                  <Link href={`/dashboard/clients/${client.id}`} className="group/link block">
-                    <div className="font-semibold text-white tracking-tight group-hover/link:text-blue-400 transition-colors flex items-center gap-2">
-                      {client.name}
-                      <ExternalLink size={12} className="opacity-0 group-hover/link:opacity-100 transition-opacity" />
-                    </div>
+                <TableCell className="py-4">
+                  {/* FIXED: Removed className from Link, moved to child div/a */}
+                  <Link href={`/dashboard/clients/${client.id}`}>
+                    <a className="group/link inline-block">
+                      <div className="font-bold text-white tracking-tight group-hover/link:text-blue-400 transition-colors flex items-center gap-2">
+                        {client.name}
+                        <ExternalLink size={12} className="opacity-0 group-hover/link:opacity-100 transition-opacity text-blue-400" />
+                      </div>
+                    </a>
                   </Link>
-                  <div className="text-[10px] text-gray-500 flex items-center gap-1 mt-0.5">
-                     UID: {client.id.slice(0, 8)}
+                  <div className="text-[9px] text-gray-600 font-mono mt-1 uppercase tracking-tighter">
+                     REF: {client.id.slice(0, 8)}
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="text-sm text-gray-300">{client.email}</div>
+                  <div className="text-sm text-gray-300 font-medium">{client.email}</div>
                   <div className="text-[11px] text-gray-500 flex items-center gap-1 mt-1 font-mono">
-                    <Phone size={10} className="text-[#35577D]" /> {client.phone || '--'}
+                    <Phone size={10} className="text-blue-900" /> {client.phone || 'NONE'}
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary" className="bg-[#35577D]/10 text-[#64B5F6] border-[#35577D]/30 text-[10px] uppercase font-bold px-2 py-0">
-                    {client.onboarding_stage || 'Docs'}
+                  <Badge variant="outline" className="bg-blue-500/5 text-blue-400 border-blue-500/20 text-[10px] font-black tracking-widest px-2 py-0">
+                    {client.onboarding_stage || 'DOCS'}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   {updatingId === client.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-[#35577D]" />
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
                   ) : (
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${
-                        client.status === 'Completed' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' :
-                        client.status === 'Blocked' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' :
-                        'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]'
+                      <div className={`w-1.5 h-1.5 rounded-full ${
+                        client.status === 'Completed' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' :
+                        client.status === 'Blocked' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]' :
+                        'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]'
                       }`} />
-                      <span className="text-xs text-white">{client.status}</span>
+                      <span className="text-[11px] font-bold text-gray-200">{client.status}</span>
                     </div>
                   )}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right pr-6">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0 text-gray-500 hover:text-white hover:bg-gray-800">
+                      <Button variant="ghost" className="h-8 w-8 p-0 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-[#1C1E24] border-gray-800 text-white shadow-2xl">
-                      <DropdownMenuLabel className="text-gray-400 text-[10px] uppercase tracking-widest">Update Lifecycle</DropdownMenuLabel>
+                    <DropdownMenuContent align="end" className="bg-[#1C1E24] border-gray-800 text-white shadow-2xl min-w-[180px]">
+                      <DropdownMenuLabel className="text-gray-500 text-[10px] uppercase tracking-[0.15em]">Management</DropdownMenuLabel>
                       <DropdownMenuSeparator className="bg-gray-800" />
                       
+                      {/* FIXED: DropdownMenuItem itself handles the click, wrapping Link inside it */}
                       <Link href={`/dashboard/clients/${client.id}`}>
-                        <DropdownMenuItem className="gap-2 cursor-pointer">
-                          <User size={14} className="text-gray-400" /> View Detailed Profile
+                        <DropdownMenuItem className="gap-2 cursor-pointer focus:bg-blue-500/10 focus:text-blue-400">
+                          <User size={14} /> Intelligence Profile
                         </DropdownMenuItem>
                       </Link>
 
                       <DropdownMenuSeparator className="bg-gray-800" />
 
                       <DropdownMenuItem onClick={() => updateStatus(client.id, 'In Progress')} className="gap-2">
-                        <Loader2 size={14} className="text-blue-500" /> Mark: In Progress
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Mark: In Progress
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => updateStatus(client.id, 'Blocked')} className="gap-2 text-red-400">
-                        <AlertCircle size={14} className="text-red-500" /> Mark: Blocked
+                      <DropdownMenuItem onClick={() => updateStatus(client.id, 'Blocked')} className="gap-2 text-red-400 focus:text-red-400">
+                        <div className="w-1.5 h-1.5 rounded-full bg-red-500" /> Mark: Blocked
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => updateStatus(client.id, 'Completed')} className="gap-2 text-green-400">
-                        <CheckCircle2 size={14} className="text-green-500" /> Mark: Completed
+                      <DropdownMenuItem onClick={() => updateStatus(client.id, 'Completed')} className="gap-2 text-green-400 focus:text-green-400">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500" /> Mark: Completed
                       </DropdownMenuItem>
+                      
                       <DropdownMenuSeparator className="bg-gray-800" />
-                      <DropdownMenuItem onClick={() => deleteClient(client.id)} className="gap-2 text-red-600 focus:bg-red-950 focus:text-red-400">
-                        <Archive size={14} /> Archive Forever
+                      
+                      <DropdownMenuItem onClick={() => deleteClient(client.id)} className="gap-2 text-red-600 focus:bg-red-950/30 focus:text-red-500">
+                        <Archive size={14} /> Wipe Record
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -178,8 +186,8 @@ export default function ClientTable() {
         </Table>
         
         {filteredClients.length === 0 && (
-          <div className="text-center py-20 bg-[#1C1E24]">
-             <p className="text-gray-600 text-sm italic">No entries match your search criteria.</p>
+          <div className="text-center py-24 bg-[#1C1E24]">
+             <p className="text-gray-600 text-sm font-mono tracking-widest uppercase">Zero records found</p>
           </div>
         )}
       </div>
