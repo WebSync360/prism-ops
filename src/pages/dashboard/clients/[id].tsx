@@ -1,5 +1,6 @@
-import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+// 1. Swap next/router for react-router-dom hooks
+import { useParams, Link } from 'react-router-dom' 
 import { supabase } from '@/lib/supabase'
 import DashboardLayout from '@/layouts/DashboardLayout'
 import { Button } from '@/components/ui/button'
@@ -7,21 +8,19 @@ import {
   ArrowLeft, Phone, Mail, Calendar, User, 
   Loader2, Save 
 } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import { Badge } from "@/components/ui/badge"
 
 export default function ClientProfile() {
-  const router = useRouter()
-  
-  // Keep the 'as any' to bypass the dynamic query type issue
-  const { id } = router.query as any 
+  // 2. Get the 'id' from useParams() instead of router.query
+  const { id } = useParams<{ id: string }>()
   
   const [client, setClient] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if ((router as any).isReady && id) {
+    // 3. In Vite, we don't need 'isReady', just check if id exists
+    if (id) {
       const fetchClient = async () => {
         const { data } = await supabase
           .from('clients')
@@ -34,7 +33,7 @@ export default function ClientProfile() {
       }
       fetchClient()
     }
-  }, [id, (router as any).isReady])
+  }, [id])
 
   const updateClientStatus = async (newStatus: string) => {
     if (!id) return
@@ -71,7 +70,7 @@ export default function ClientProfile() {
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
         
-        {/* FIXED: Removed legacyBehavior and internal <a> tag */}
+        {/* 4. Use 'to' instead of 'href' for the Link component */}
         <Link to="/dashboard">
           <Button 
             variant="ghost" 
@@ -95,7 +94,7 @@ export default function ClientProfile() {
                       {client.onboarding_stage || 'PENDING'}
                     </Badge>
                     <span className="text-gray-600 font-mono text-[10px] tracking-tighter uppercase">
-                      Reference: {typeof id === 'string' ? id.slice(0, 12) : 'ANALYZING...'}
+                      Reference: {id?.slice(0, 12) || 'ANALYZING...'}
                     </span>
                   </div>
                 </div>
@@ -123,7 +122,6 @@ export default function ClientProfile() {
               </div>
             </div>
 
-            {/* Content sections... */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-16 mt-12 relative z-10">
               <div className="lg:col-span-2 space-y-10">
                 <div>
@@ -139,6 +137,13 @@ export default function ClientProfile() {
                       <p className="text-[10px] text-gray-600 uppercase font-black mb-1.5">Direct Line</p>
                       <div className="flex items-center gap-3 text-gray-200 font-mono text-sm tracking-tight">
                         <Phone size={16} className="text-gray-700" /> {client.phone || 'UNAVAILABLE'}
+                      </div>
+                    </div>
+                    <div className="group">
+                      <p className="text-[10px] text-gray-600 uppercase font-black mb-1.5">Origin Date</p>
+                      <div className="flex items-center gap-3 text-gray-400 font-medium">
+                        <Calendar size={16} className="text-gray-700" /> 
+                        {client.created_at ? new Date(client.created_at).toLocaleDateString(undefined, { dateStyle: 'full' }) : 'N/A'}
                       </div>
                     </div>
                   </div>
