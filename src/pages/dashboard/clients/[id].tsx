@@ -7,7 +7,7 @@ import {
   ArrowLeft, Phone, Mail, Calendar, User, 
   Loader2, Save 
 } from 'lucide-react'
-import Link from 'next/link'
+import { Link } from 'react-router-dom'
 import { Badge } from "@/components/ui/badge"
 
 export default function ClientProfile() {
@@ -72,7 +72,7 @@ export default function ClientProfile() {
       <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
         
         {/* FIXED: Removed legacyBehavior and internal <a> tag */}
-        <Link href="/dashboard">
+        <Link to="/dashboard">
           <Button 
             variant="ghost" 
             className="text-gray-500 hover:text-white hover:bg-white/5 gap-2 p-0 px-3 transition-all rounded-full border border-transparent hover:border-gray-800"

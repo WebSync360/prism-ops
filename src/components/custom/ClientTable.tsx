@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import Link from 'next/link' 
+import { Link } from 'react-router-dom'
 import {
   Table,
   TableBody,
