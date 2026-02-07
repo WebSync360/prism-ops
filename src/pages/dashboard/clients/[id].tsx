@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import DashboardLayout from '@/layouts/DashboardLayout'

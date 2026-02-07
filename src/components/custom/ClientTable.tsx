@@ -105,7 +105,7 @@ export default function ClientTable() {
               <TableRow key={client.id} className="border-gray-800 hover:bg-[#141E30]/80 transition-colors group/row">
                 <TableCell className="py-4">
                   {/* FIXED: Removed className from Link, moved to child div/a */}
-                  <Link href={`/dashboard/clients/${client.id}`}>
+                  <Link to={`/dashboard/clients/${client.id}`}>
                     <a className="group/link inline-block">
                       <div className="font-bold text-white tracking-tight group-hover/link:text-blue-400 transition-colors flex items-center gap-2">
                         {client.name}
@@ -154,7 +154,7 @@ export default function ClientTable() {
                       <DropdownMenuSeparator className="bg-gray-800" />
                       
                       {/* FIXED: DropdownMenuItem itself handles the click, wrapping Link inside it */}
-                      <Link href={`/dashboard/clients/${client.id}`}>
+                      <Link to={`/dashboard/clients/${client.id}`}>
                         <DropdownMenuItem className="gap-2 cursor-pointer focus:bg-blue-500/10 focus:text-blue-400">
                           <User size={14} /> Intelligence Profile
                         </DropdownMenuItem>
