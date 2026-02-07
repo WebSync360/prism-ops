@@ -62,15 +62,6 @@ export default function Dashboard() {
            <MetricCard title="Successes" value={stats.completed} color="border-l-green-500" />
         </div>
 
-        {/* SECTION 2: DOPAMINE HEATMAP (STAGES) */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-[0.2em]">Onboarding Flow</h3>
-            <div className="h-[1px] flex-1 bg-gray-800"></div>
-          </div>
-          <StageHeatmap clients={clients} />
-        </div>
-
         {/* SECTION 3: THE SPREADSHEET (DATABASE) */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -83,8 +74,19 @@ export default function Dashboard() {
         </div>
 
       </div>
+
+      
+        {/* SECTION 2: DOPAMINE HEATMAP (STAGES) */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-[0.2em]">Onboarding Flow</h3>
+            <div className="h-[1px] flex-1 bg-gray-800"></div>
+          </div>
+          <StageHeatmap clients={clients} />
+        </div>
     </DashboardLayout>
   )
+
 }
 
 function MetricCard({ title, value, color = "" }: { title: string, value: number, color?: string }) {

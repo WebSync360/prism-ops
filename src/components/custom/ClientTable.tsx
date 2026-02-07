@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import Link from 'next/link' // <--- Crucial for navigation
 import {
   Table,
   TableBody,
@@ -19,7 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { MoreHorizontal, Loader2, Phone, Search, Archive, CheckCircle2, AlertCircle } from "lucide-react"
+import { MoreHorizontal, Loader2, Phone, Search, Archive, CheckCircle2, AlertCircle, ExternalLink } from "lucide-react"
 
 export default function ClientTable() {
   const [clients, setClients] = useState<any[]>([])
@@ -52,9 +53,7 @@ export default function ClientTable() {
 
   const deleteClient = async (id: string) => {
     if (!confirm("Are you sure? This will permanently remove this client.")) return
-
     const { error } = await supabase.from('clients').delete().eq('id', id)
-
     if (!error) {
       setClients(clients.filter(c => c.id !== id))
       window.dispatchEvent(new Event('refresh-metrics'))
@@ -63,13 +62,11 @@ export default function ClientTable() {
 
   useEffect(() => {
     fetchClients()
-    // Listen for additions from the popup
     const handleRefresh = () => fetchClients()
     window.addEventListener('refresh-metrics', handleRefresh)
     return () => window.removeEventListener('refresh-metrics', handleRefresh)
   }, [])
 
-  // 🕵️‍♂️ Search Logic: Filter by name or email
   const filteredClients = clients.filter(c => 
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     c.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -79,7 +76,6 @@ export default function ClientTable() {
 
   return (
     <div className="space-y-4">
-      {/* 🔍 SEARCH BAR */}
       <div className="relative group max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#35577D] transition-colors" size={16} />
         <Input 
@@ -90,7 +86,6 @@ export default function ClientTable() {
         />
       </div>
 
-      {/* 📊 SPREADSHEET TABLE */}
       <div className="rounded-xl border border-gray-800 bg-[#1C1E24] overflow-hidden shadow-2xl">
         <Table>
           <TableHeader className="bg-[#141E30]/50">
@@ -104,9 +99,15 @@ export default function ClientTable() {
           </TableHeader>
           <TableBody>
             {filteredClients.map((client) => (
-              <TableRow key={client.id} className="border-gray-800 hover:bg-[#141E30]/80 transition-colors">
+              <TableRow key={client.id} className="border-gray-800 hover:bg-[#141E30]/80 transition-colors group/row">
                 <TableCell>
-                  <div className="font-semibold text-white tracking-tight">{client.name}</div>
+                  {/* WRAPPED IN LINK TO PROFILE PAGE */}
+                  <Link href={`/dashboard/clients/${client.id}`} className="group/link block">
+                    <div className="font-semibold text-white tracking-tight group-hover/link:text-blue-400 transition-colors flex items-center gap-2">
+                      {client.name}
+                      <ExternalLink size={12} className="opacity-0 group-hover/link:opacity-100 transition-opacity" />
+                    </div>
+                  </Link>
                   <div className="text-[10px] text-gray-500 flex items-center gap-1 mt-0.5">
                      UID: {client.id.slice(0, 8)}
                   </div>
@@ -146,6 +147,15 @@ export default function ClientTable() {
                     <DropdownMenuContent align="end" className="bg-[#1C1E24] border-gray-800 text-white shadow-2xl">
                       <DropdownMenuLabel className="text-gray-400 text-[10px] uppercase tracking-widest">Update Lifecycle</DropdownMenuLabel>
                       <DropdownMenuSeparator className="bg-gray-800" />
+                      
+                      <Link href={`/dashboard/clients/${client.id}`}>
+                        <DropdownMenuItem className="gap-2 cursor-pointer">
+                          <User size={14} className="text-gray-400" /> View Detailed Profile
+                        </DropdownMenuItem>
+                      </Link>
+
+                      <DropdownMenuSeparator className="bg-gray-800" />
+
                       <DropdownMenuItem onClick={() => updateStatus(client.id, 'In Progress')} className="gap-2">
                         <Loader2 size={14} className="text-blue-500" /> Mark: In Progress
                       </DropdownMenuItem>
