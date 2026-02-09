@@ -43,7 +43,7 @@ export default function Sidebar({ onItemClick }: { onItemClick?: () => void }) {
                   : 'text-gray-500 hover:bg-[#141E30] hover:text-white'
               }`}
             >
-              <item.icon size={18} className={isActive ? 'text-blue-400' : 'group-hover:text-blue-400'} />
+              <item.icon size={18} className={isActive ? 'text-blue-400/20' : 'group-hover:text-blue-400'} />
               <span className="font-semibold text-sm tracking-tight">{item.label}</span>
               
               {isActive && (
