@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { 
   MoreHorizontal, Loader2, Phone, Search, 
-  Archive, CheckCircle2, AlertCircle, ExternalLink, User 
+  Archive, ExternalLink, User 
 } from "lucide-react"
 
 export default function ClientTable() {
@@ -104,17 +104,18 @@ export default function ClientTable() {
             {filteredClients.map((client) => (
               <TableRow key={client.id} className="border-gray-800 hover:bg-[#141E30]/80 transition-colors group/row">
                 <TableCell className="py-4">
-                  {/* FIXED: Removed className from Link, moved to child div/a */}
-                  <Link to={`/dashboard/clients/${client.id}`}>
-                    <a className="group/link inline-block">
-                      <div className="font-bold text-white tracking-tight group-hover/link:text-blue-400 transition-colors flex items-center gap-2">
-                        {client.name}
-                        <ExternalLink size={12} className="opacity-0 group-hover/link:opacity-100 transition-opacity text-blue-400" />
-                      </div>
-                    </a>
+                  {/* FIX 1: Applied className to Link directly, removed nested <a> */}
+                  <Link 
+                    to={`/dashboard/clients/${client.id}`}
+                    className="group/link inline-block"
+                  >
+                    <div className="font-bold text-white tracking-tight group-hover/link:text-blue-400 transition-colors flex items-center gap-2">
+                      {client.name}
+                      <ExternalLink size={12} className="opacity-0 group-hover/link:opacity-100 transition-opacity text-blue-400" />
+                    </div>
                   </Link>
                   <div className="text-[9px] text-gray-600 font-mono mt-1 uppercase tracking-tighter">
-                     REF: {client.id.slice(0, 8)}
+                      REF: {client.id.slice(0, 8)}
                   </div>
                 </TableCell>
                 <TableCell>
@@ -153,12 +154,12 @@ export default function ClientTable() {
                       <DropdownMenuLabel className="text-gray-500 text-[10px] uppercase tracking-[0.15em]">Management</DropdownMenuLabel>
                       <DropdownMenuSeparator className="bg-gray-800" />
                       
-                      {/* FIXED: DropdownMenuItem itself handles the click, wrapping Link inside it */}
-                      <Link to={`/dashboard/clients/${client.id}`}>
-                        <DropdownMenuItem className="gap-2 cursor-pointer focus:bg-blue-500/10 focus:text-blue-400">
+                      {/* FIX 2: Using 'asChild' on DropdownMenuItem so it converts the Link into a menu item correctly */}
+                      <DropdownMenuItem asChild className="gap-2 cursor-pointer focus:bg-blue-500/10 focus:text-blue-400">
+                        <Link to={`/dashboard/clients/${client.id}`}>
                           <User size={14} /> Intelligence Profile
-                        </DropdownMenuItem>
-                      </Link>
+                        </Link>
+                      </DropdownMenuItem>
 
                       <DropdownMenuSeparator className="bg-gray-800" />
 

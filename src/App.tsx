@@ -5,6 +5,7 @@ import Dashboard from './pages/dashboard'
 import DailySnapshot from './pages/dashboard/snapshot'
 import ClientProfile from './pages/dashboard/clients/[id]' 
 import { ProtectedRoute } from './components/custom/ProtectedRoute'
+import Settings from './pages/dashboard/settings'
 
 const queryClient = new QueryClient()
 
@@ -53,6 +54,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <DailySnapshot />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/settings" 
+            element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             } 
           />
