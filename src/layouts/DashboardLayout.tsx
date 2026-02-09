@@ -122,8 +122,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <div className="flex items-center gap-4">
                <div className="hidden lg:block text-right">
                  <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest leading-none mb-1.5">Founder_Node</p>
-                 <p className="text-[11px] font-bold text-white leading-none flex items-center gap-1.5 justify-end">
-                   <span className="h-1 w-1 bg-green-500 rounded-full" /> Authorized
+                 <p className="text-[11px] font-bold text-white leading-none flex items-center gap-1.5 justify-center">
+                   Authorized
                  </p>
                </div>
                <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-[#1C1E24] to-[#141E30] border border-gray-700 flex items-center justify-center text-xs font-black text-blue-400 shadow-2xl ring-1 ring-blue-500/20">
