@@ -1,7 +1,7 @@
 import { ReactNode, useState, useEffect } from 'react'
 import Sidebar from '@/components/custom/Sidebar'
 import { supabase } from '@/lib/supabase'
-import { Menu, X, Bell, Zap, Triangle } from 'lucide-react'
+import { Menu, X, Bell, Zap, Triangle, Activity } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 // 1. Integrated Prism-Ops Logo Component
@@ -26,15 +26,22 @@ export const Logo = ({ className = "", variant = "dark" }: { className?: string,
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [userInitials, setUserInitials] = useState('??')
+  const [workspaceName, setWorkspaceName] = useState('FOUNDER_NODE') // Default fallback
   const [pendingActions, setPendingActions] = useState(0)
 
   useEffect(() => {
-    const getUser = async () => {
+    const getUserData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (user?.email) {
-        const name = user.user_metadata?.full_name || user.email
-        const initials = name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+      if (user) {
+        // 1. Get Initials from Email or Name
+        const name = user.user_metadata?.full_name || user.email || 'Admin'
+        const initials = name.split(/[@\s.]/).map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
         setUserInitials(initials)
+
+        // 2. Get Workspace Name from Metadata (Set during onboarding)
+        if (user.user_metadata?.workspace_name) {
+          setWorkspaceName(user.user_metadata.workspace_name.toUpperCase())
+        }
       }
     }
 
@@ -46,7 +53,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       setPendingActions(count || 0)
     }
 
-    getUser()
+    getUserData()
     fetchAlerts()
   }, [])
 
@@ -73,7 +80,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               </Button>
             </div>
             <div className="flex-1 overflow-y-auto">
-                {/* We pass a prop to close menu when a link is clicked */}
                 <Sidebar onItemClick={() => setIsMobileMenuOpen(false)} />
             </div>
           </div>
@@ -114,16 +120,17 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                
                <div className="hidden sm:flex items-center gap-2.5 bg-red-500/5 px-3 py-1.5 rounded-lg border border-red-500/10">
                  <Zap size={12} className="text-red-500" />
-                 <span className="text-[10px] font-black text-red-500 uppercase tracking-tight">{pendingActions} Actions Required</span>
+                 <span className="text-[10px] font-black text-red-500 uppercase tracking-tight">{pendingActions} Issues Detected</span>
                </div>
             </div>
 
-            {/* Founder Node Info */}
+            {/* Founder Node Info - DYNAMIC */}
             <div className="flex items-center gap-4">
                <div className="hidden lg:block text-right">
-                 <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest leading-none mb-1.5">Founder_Node</p>
-                 <p className="text-[11px] font-bold text-white leading-none flex items-center gap-1.5 justify-center">
-                   Authorized
+                 <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest leading-none mb-1.5">Node_ID</p>
+                 <p className="text-[11px] font-bold text-white leading-none flex items-center gap-1.5 justify-center uppercase tracking-tighter">
+                   <Activity size={10} className="text-blue-500" />
+                   {workspaceName}
                  </p>
                </div>
                <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-[#1C1E24] to-[#141E30] border border-gray-700 flex items-center justify-center text-xs font-black text-blue-400 shadow-2xl ring-1 ring-blue-500/20">
