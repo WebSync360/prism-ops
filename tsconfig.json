@@ -13,6 +13,9 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* Vite support */
+    "types": ["vite/client"], 
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": false,
@@ -25,5 +28,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "src/vite-env.d.ts"],
+  "include": ["src"]
 }
