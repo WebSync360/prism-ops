@@ -13,6 +13,12 @@ dist-ssr
 *.local
 .env
 .env.*.local
+.cache
+.next
+out
+build
+coverage
+*.tsbuildinfo
 
 
 # Editor directories and files
