@@ -70,7 +70,7 @@ export default function Sidebar({ onItemClick }: { onItemClick?: () => void }) {
 
         {/* FEEDBACK LINK (Mailto) */}
         <a 
-          href="mailto:support@prismops.com" // Replace with your actual email
+          href="prismops22@gmail.com" // Replace with your actual email
           className="flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-500 hover:text-green-400 hover:bg-green-500/5 transition-all duration-200 group"
         >
           <MessageSquare size={18} />
