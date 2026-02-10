@@ -1,12 +1,22 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+// Public Pages
+import Landing from './pages/Landing'
 import Login from './pages/auth/Login'
+import Signup from './pages/auth/Signup' // Ensure you create this file
+
+// App Pages
+import Onboarding from './pages/onboarding' // The 3-question flow
 import Dashboard from './pages/dashboard'
-import DailySnapshot from './pages/dashboard/snapshot'
-import ClientsPage from './pages/dashboard/clients/index' // 1. Point to your new list page
+import ClientsPage from './pages/dashboard/clients/index'
 import ClientProfile from './pages/dashboard/clients/[id]' 
-import { ProtectedRoute } from './components/custom/ProtectedRoute'
+import DailySnapshot from './pages/dashboard/snapshot'
 import Settings from './pages/dashboard/settings'
+import Billing from './pages/dashboard/billing' // New Billing page
+
+// Components
+import { ProtectedRoute } from './components/custom/ProtectedRoute'
 
 const queryClient = new QueryClient()
 
@@ -15,9 +25,23 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
+          {/* --- PUBLIC ROUTES --- */}
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           
-          {/* Main Dashboard (The Command Center with Heatmap/Metrics) */}
+          {/* --- PROTECTED ONBOARDING --- */}
+          {/* Users go here first after signing up */}
+          <Route 
+            path="/onboarding" 
+            element={
+              <ProtectedRoute>
+                <Onboarding />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* --- CORE APP ROUTES --- */}
           <Route 
             path="/dashboard" 
             element={
@@ -27,7 +51,6 @@ function App() {
             } 
           />
 
-          {/* 2. Dedicated Client List View (Search/Table only) */}
           <Route 
             path="/dashboard/clients" 
             element={
@@ -37,7 +60,6 @@ function App() {
             } 
           />
 
-          {/* Dynamic Client Profile (Deep Dive) */}
           <Route 
             path="/dashboard/clients/:id" 
             element={
@@ -47,8 +69,9 @@ function App() {
             } 
           />
 
+          {/* Updated to /snapshot to match Bible */}
           <Route 
-            path="/daily-snapshot" 
+            path="/snapshot" 
             element={
               <ProtectedRoute>
                 <DailySnapshot />
@@ -65,9 +88,17 @@ function App() {
             } 
           />
 
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          
-          {/* Global Redirect for undefined routes */}
+          <Route 
+            path="/billing" 
+            element={
+              <ProtectedRoute>
+                <Billing />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* --- REDIRECTS & CATCH-ALL --- */}
+          {/* If a user is logged in and hits a dead link, take them home */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </BrowserRouter>
