@@ -90,7 +90,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         
         {/* COMMAND CENTER TOP BAR */}
-        <header className="h-16 flex items-center justify-between px-4 md:px-8 bg-[#1C1E24]/80 backdrop-blur-xl border-b border-gray-800/50 relative z-40">
+        <header className="h-16 flex items-center justify-between px-4 md:px-8 bg-[#0A0C10] backdrop-blur-xl border-b border-gray-800/50 relative z-40">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsMobileMenuOpen(true)}

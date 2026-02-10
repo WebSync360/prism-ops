@@ -19,7 +19,7 @@ export default function Sidebar({ onItemClick }: { onItemClick?: () => void }) {
   }
 
   return (
-    <div className="w-64 bg-[#1C1E24] flex flex-col h-full border-r border-gray-800/50">
+    <div className="w-64 bg-[#0A0C10] flex flex-col h-full border-r border-gray-800/50">
       {/* BRANDING SECTION */}
       <div className="p-8 hidden md:block">
         <Logo variant="dark" />
