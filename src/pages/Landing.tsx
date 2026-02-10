@@ -65,7 +65,7 @@ export default function Landing() {
                */}
                <div className="relative aspect-video bg-gray-900 overflow-hidden">
                  <img 
-                   src="/assets/Prism-Ops.png" 
+                   src="./assets/Prism-Ops.png" 
                    alt="System Interface"
                    className="object-cover w-full h-full opacity-40 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
                  />
