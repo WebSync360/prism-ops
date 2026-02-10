@@ -21,7 +21,7 @@ export default function Landing() {
 
       {/* HERO SECTION */}
       <section className="relative pt-18 pb-24 px-6">
-        {/* The Luxury Grid Background */}
+        {/* Luxury Grid Background */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
 
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center relative z-10">
@@ -52,25 +52,36 @@ export default function Landing() {
               </Button>
               <button className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-all">
                 <span>See Platform Features</span>
-                <div className="h-[1px] w-8 bg-gray-800" /> {/* Fixed the decorative line */}
               </button>
             </div>
           </div>
 
-          {/* HERO IMAGE / PREVIEW */}
+          {/* HERO IMAGE / PREVIEW (Fixed Option 2) */}
           <div className="relative group">
             <div className="absolute -inset-4 bg-blue-600/10 rounded-full blur-[100px] opacity-50" />
             <div className="relative bg-[#0A0C10] border border-white/10 p-1 shadow-2xl">
-               <div className="relative aspect-video bg-gray-900 overflow-hidden">
-                 <img 
-                   src={prismImg} 
-                   alt="Prism-Ops Dashboard"
-                   className="object-cover w-full h-full opacity-60 group-hover:opacity-100 transition-all duration-700"
-                   onError={(e) => {
-                     // If the image fails, it shows this tech-style fallback
-                     e.currentTarget.src = "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070";
-                   }}
-                 />
+               <div className="relative aspect-video bg-[#0D1117] overflow-hidden flex flex-col">
+                 {/* Fake Window Header */}
+                 <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+                    <div className="h-2 w-2 rounded-full bg-red-500/20" />
+                    <div className="h-2 w-2 rounded-full bg-yellow-500/20" />
+                    <div className="h-2 w-2 rounded-full bg-green-500/20" />
+                    <div className="ml-4 h-2 w-24 bg-white/5 rounded-full" />
+                 </div>
+                 {/* Content Area */}
+                 <div className="flex-1 relative flex items-center justify-center p-8">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-600/10 via-transparent to-transparent" />
+                    {/* Visual representation of a dashboard grid */}
+                    <div className="w-full h-full border border-white/5 grid grid-cols-3 gap-2 p-2 opacity-20">
+                      <div className="bg-white/10 h-full w-full" />
+                      <div className="bg-white/10 h-full w-full col-span-2" />
+                      <div className="bg-white/10 h-full w-full col-span-2" />
+                      <div className="bg-white/10 h-full w-full" />
+                    </div>
+                    <div className="absolute text-[10px] font-mono text-blue-500 tracking-[0.5em] uppercase animate-pulse bg-[#0A0C10] px-4 py-2 border border-blue-500/20">
+                      System_Link_Active
+                    </div>
+                 </div>
                  <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10] via-transparent to-transparent" />
                </div>
             </div>
@@ -79,7 +90,7 @@ export default function Landing() {
       </section>
 
       {/* THREE-COLUMN VALUE PROPS */}
-      <section className="py-24 border-t border-white/5 relative bg-[#0A0C10]">
+      <section className="py-18 border-t border-white/5 relative bg-[#0A0C10]">
         <div className="max-w-7xl mx-auto px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-1 bg-white/5 border border-white/5">
             <FeatureCard 
