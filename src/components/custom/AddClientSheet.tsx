@@ -24,7 +24,6 @@ export default function AddClientSheet({ onClientAdded }: { onClientAdded: () =>
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   
-  // Updated state to include Phone and Stage
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -37,25 +36,45 @@ export default function AddClientSheet({ onClientAdded }: { onClientAdded: () =>
     e.preventDefault()
     setLoading(true)
 
-    const { error } = await supabase
-      .from('clients')
-      .insert([formData])
+    try {
+      // 1. Identify the current founder session
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-    if (error) {
-      alert("Database Error: " + error.message)
-    } else {
-      setOpen(false)
-      // Reset form with new defaults
-      setFormData({ 
-        name: '', 
-        email: '', 
-        phone: '', 
-        status: 'In Progress', 
-        onboarding_stage: 'Docs' 
-      })
-      onClientAdded() 
+      if (userError || !user) {
+        alert("Authentication Error: Please sign in again.")
+        return
+      }
+
+      // 2. Insert record with the user_id (Ownership Link)
+      const { error } = await supabase
+        .from('clients')
+        .insert([
+          { 
+            ...formData, 
+            user_id: user.id 
+          }
+        ])
+
+      if (error) {
+        alert("Database Error: " + error.message)
+      } else {
+        // Success: Reset and Close
+        setOpen(false)
+        setFormData({ 
+          name: '', 
+          email: '', 
+          phone: '', 
+          status: 'In Progress', 
+          onboarding_stage: 'Docs' 
+        })
+        onClientAdded() // Triggers the dashboard refresh
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err)
+      alert("An unexpected error occurred. Please try again.")
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (
@@ -83,6 +102,7 @@ export default function AddClientSheet({ onClientAdded }: { onClientAdded: () =>
             <Input 
               id="name" 
               required
+              placeholder="e.g. John Smith"
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
               className="bg-[#141E30] border-gray-700 text-white focus:border-[#35577D]" 
@@ -99,6 +119,7 @@ export default function AddClientSheet({ onClientAdded }: { onClientAdded: () =>
                 id="email" 
                 type="email"
                 required
+                placeholder="client@company.com"
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                 className="bg-[#141E30] border-gray-700 text-white focus:border-[#35577D]" 
@@ -122,12 +143,12 @@ export default function AddClientSheet({ onClientAdded }: { onClientAdded: () =>
           <div className="grid grid-cols-2 gap-4">
             {/* Status Dropdown */}
             <div className="space-y-2">
-              <Label className="text-gray-400">Pipeline Status</Label>
+              <Label className="text-gray-400 font-medium">Pipeline Status</Label>
               <Select 
                 value={formData.status} 
                 onValueChange={(val) => setFormData({...formData, status: val})}
               >
-                <SelectTrigger className="bg-[#141E30] border-gray-700 text-white">
+                <SelectTrigger className="bg-[#141E30] border-gray-700 text-white focus:ring-1 focus:ring-blue-500">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#1C1E24] border-gray-800 text-white">
@@ -140,14 +161,14 @@ export default function AddClientSheet({ onClientAdded }: { onClientAdded: () =>
 
             {/* Onboarding Stage Dropdown */}
             <div className="space-y-2">
-              <Label className="text-gray-400 flex items-center gap-2">
+              <Label className="text-gray-400 flex items-center gap-2 font-medium">
                 <Activity size={14} /> Onboarding Stage
               </Label>
               <Select 
                 value={formData.onboarding_stage} 
                 onValueChange={(val) => setFormData({...formData, onboarding_stage: val})}
               >
-                <SelectTrigger className="bg-[#141E30] border-gray-700 text-white">
+                <SelectTrigger className="bg-[#141E30] border-gray-700 text-white focus:ring-1 focus:ring-blue-500">
                   <SelectValue placeholder="Stage" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#1C1E24] border-gray-800 text-white">
@@ -160,8 +181,17 @@ export default function AddClientSheet({ onClientAdded }: { onClientAdded: () =>
             </div>
           </div>
 
-          <Button type="submit" className="w-full bg-[#35577D] hover:bg-[#2a4563] text-white h-12 mt-4" disabled={loading}>
-            {loading ? 'Processing...' : 'Add to Pipeline'}
+          <Button 
+            type="submit" 
+            className="w-full bg-[#35577D] hover:bg-[#2a4563] text-white h-12 mt-4 font-bold tracking-tight transition-all active:scale-[0.98]" 
+            disabled={loading}
+          >
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                <span>Syncing to Database...</span>
+              </div>
+            ) : 'Add to Pipeline'}
           </Button>
         </form>
       </SheetContent>
