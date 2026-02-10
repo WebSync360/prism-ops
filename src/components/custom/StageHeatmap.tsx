@@ -21,7 +21,7 @@ export default function StageHeatmap({ clients }: { clients: any[] }) {
             <div className={`absolute -right-4 -top-4 w-16 h-16 blur-2xl opacity-0 group-hover:opacity-20 transition-opacity ${s.bg.replace('/10', '')}`} />
 
             <div className="flex items-center justify-between relative z-10">
-              <div className="flex items-center gap-3">
+              <div className="flex `items-center` gap-3">
                 <div className={`p-2.5 rounded-xl ${s.bg} border border-white/5 shadow-inner`}>
                   <s.icon className={s.color} size={20} />
                 </div>
