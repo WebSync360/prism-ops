@@ -67,16 +67,7 @@ export default function Login() {
             {isSignUp ? 'Deploy your command center.' : 'Welcome back, Commander.'}
           </p>
         </div>
-
-        <Button 
-          variant="outline" 
-          onClick={handleGoogleLogin}
-          className="w-full h-12 border-gray-800 bg-transparent hover:bg-white/5 text-white flex items-center gap-3 rounded-xl font-bold transition-all"
-        >
-          <Chrome size={18} className="text-blue-400" />
-          Continue with Google
-        </Button>
-
+        
         <div className="relative">
           <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-gray-800" /></div>
           <div className="relative flex justify-center text-[10px] uppercase font-black tracking-widest text-gray-600">
