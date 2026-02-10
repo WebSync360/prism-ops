@@ -101,7 +101,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             
             <div className="hidden md:flex items-center gap-3">
               <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-              <span className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.3em]">Prism_Kernel_Active</span>
+              <span className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.3em]">Prism_Operational</span>
             </div>
           </div>
 
@@ -127,9 +127,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             {/* Founder Node Info - DYNAMIC */}
             <div className="flex items-center gap-4">
                <div className="hidden lg:block text-right">
-                 <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest leading-none mb-1.5">Node_ID</p>
+                 <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest leading-none mb-1.5">Workspace</p>
                  <p className="text-[11px] font-bold text-white leading-none flex items-center gap-1.5 justify-center uppercase tracking-tighter">
-                   <Activity size={10} className="text-blue-500" />
                    {workspaceName}
                  </p>
                </div>

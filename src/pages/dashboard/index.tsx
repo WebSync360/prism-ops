@@ -72,7 +72,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold text-gray-500 uppercase tracking-[0.2em]">Active Records</h3>
             <span className="text-[10px] text-blue-400 font-bold bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20 uppercase">
-              Secure_Kernel_Locked
+              Session Encrypted
             </span>
           </div>
           <ClientTable key={refreshKey} />

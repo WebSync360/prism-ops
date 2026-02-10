@@ -61,7 +61,7 @@ export default function Login() {
       <div className="w-full max-w-md bg-[#1C1E24] border border-gray-800 rounded-3xl p-8 shadow-2xl space-y-8 animate-in fade-in zoom-in duration-500">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-black text-white tracking-tight">
-            {isSignUp ? 'Initialize Founder Node' : 'Access Terminal'}
+            {isSignUp ? 'Create Workspace' : 'SECURE LOGIN'}
           </h1>
           <p className="text-gray-500 text-sm">
             {isSignUp ? 'Deploy your command center.' : 'Welcome back, Commander.'}
