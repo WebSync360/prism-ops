@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import { Logo } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Shield, Zap, Target, Layout } from "lucide-react";
+import { ChevronRight, Shield, Zap, Target } from "lucide-react";
+
+// 1. IMPORT YOUR IMAGE HERE (Ensures Vite finds it)
+import prismImg from "@/assets/prism.png"; 
 
 export default function Landing() {
   return (
@@ -26,7 +29,7 @@ export default function Landing() {
 
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center relative z-10">
           <div className="space-y-10">
-            {/* Real Status Bar (Meaningful) */}
+            {/* Real Status Bar */}
             <div className="inline-flex items-center gap-3 px-3 py-1.5 rounded-none border-l-2 border-blue-600 bg-blue-600/5">
               <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
               <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-400">
@@ -52,7 +55,7 @@ export default function Landing() {
               </Button>
               <button className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-all">
                 <span>See Platform Features</span>
-                <div className="bg-gray-800" />
+                <div className="h-[1px] w-8 bg-gray-800" /> {/* Fixed the decorative line */}
               </button>
             </div>
           </div>
@@ -63,10 +66,11 @@ export default function Landing() {
             <div className="relative bg-[#0A0C10] border border-white/10 p-1 shadow-2xl">
                <div className="relative aspect-video bg-gray-900 overflow-hidden">
                  <img 
-                   src="./assets/prism.png" 
+                   src={prismImg} 
                    alt="Prism-Ops Dashboard"
                    className="object-cover w-full h-full opacity-60 group-hover:opacity-100 transition-all duration-700"
                    onError={(e) => {
+                     // If the image fails, it shows this tech-style fallback
                      e.currentTarget.src = "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070";
                    }}
                  />
@@ -77,7 +81,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* THREE-COLUMN VALUE PROPS (The Industrial Look) */}
+      {/* THREE-COLUMN VALUE PROPS */}
       <section className="py-24 border-t border-white/5 relative bg-[#0A0C10]">
         <div className="max-w-7xl mx-auto px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-1 bg-white/5 border border-white/5">
