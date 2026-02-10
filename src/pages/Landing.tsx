@@ -90,7 +90,7 @@ export default function Landing() {
       </section>
 
       {/* THREE-COLUMN VALUE PROPS */}
-      <section className="py-18 border-t border-white/5 relative bg-[#0A0C10]">
+      <section className="py-20 border-t border-white/5 relative bg-[#0A0C10]">
         <div className="max-w-7xl mx-auto px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-1 bg-white/5 border border-white/5">
             <FeatureCard 
@@ -114,9 +114,9 @@ export default function Landing() {
 
       {/* FOOTER */}
       <footer className="py-20 border-t border-white/5 text-center">
-        <p className="text-[10px] font-black text-gray-700 uppercase tracking-[0.5em]">
-          Prism-Ops // Built for Founders.
-        </p>
+        <p className="text-[10px] font-bold text-gray-600 uppercase tracking-[0.4em]">
+          Prism-Ops © 2026 : Precision Infrastructure
+       </p>
       </footer>
     </div>
   );
