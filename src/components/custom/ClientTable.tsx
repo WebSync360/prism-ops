@@ -97,7 +97,7 @@ export default function ClientTable() {
               <TableHead className="text-gray-500 font-bold uppercase text-[10px] tracking-[0.2em]">Contact Point</TableHead>
               <TableHead className="text-gray-500 font-bold uppercase text-[10px] tracking-[0.2em]">Flow Stage</TableHead>
               <TableHead className="text-gray-500 font-bold uppercase text-[10px] tracking-[0.2em]">Status</TableHead>
-              <TableHead className="text-right text-gray-500 font-bold uppercase text-[10px] tracking-[0.2em] pr-6">Commands.</TableHead>
+              <TableHead className="text-right text-gray-500 font-bold uppercase text-[10px] tracking-[0.2em] pr-6">Commands..</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
