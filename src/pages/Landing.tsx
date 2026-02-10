@@ -3,9 +3,6 @@ import { Logo } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Shield, Zap, Target } from "lucide-react";
 
-// 1. IMPORT YOUR IMAGE HERE (Ensures Vite finds it)
-import prismImg from "@/assets/prism.png"; 
-
 export default function Landing() {
   return (
     <div className="min-h-screen bg-[#0A0C10] text-[#DCDAD9] selection:bg-blue-500/30 overflow-x-hidden font-sans">
