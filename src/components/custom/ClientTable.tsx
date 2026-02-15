@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   Table,
   TableBody,
@@ -22,7 +22,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { 
   MoreHorizontal, Loader2, Phone, Search, 
-  Archive, ExternalLink, User, Layers
+  Archive, User, ShieldAlert, Cpu, Activity,
+  ChevronRight, Zap
 } from "lucide-react"
 
 export default function ClientTable() {
@@ -30,25 +31,34 @@ export default function ClientTable() {
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [userIsPro, setUserIsPro] = useState(false)
+  const navigate = useNavigate()
 
-  // 1. DATA FETCHING
+  const CLIENT_LIMIT = 50
+
   const fetchClients = async () => {
-    const { data, error } = await supabase
+    setLoading(true)
+    
+    // 1. Fetch Client Nodes
+    const { data: clientData, error } = await supabase
       .from('clients')
       .select('*')
       .order('created_at', { ascending: false })
-    if (!error) setClients(data)
+    
+    // 2. Fetch User Pro Status
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_pro')
+      .single()
+      
+    if (!error) setClients(clientData || [])
+    if (profile) setUserIsPro(profile.is_pro)
     setLoading(false)
   }
 
-  // 2. LOGIC: UPDATE STATUS (In Progress, Blocked, etc.)
   const updateStatus = async (id: string, newStatus: string) => {
     setUpdatingId(id)
-    const { error } = await supabase
-      .from('clients')
-      .update({ status: newStatus })
-      .eq('id', id)
-
+    const { error } = await supabase.from('clients').update({ status: newStatus }).eq('id', id)
     if (!error) {
       setClients(clients.map(c => c.id === id ? { ...c, status: newStatus } : c))
       window.dispatchEvent(new Event('refresh-metrics'))
@@ -56,14 +66,9 @@ export default function ClientTable() {
     setUpdatingId(null)
   }
 
-  // 3. LOGIC: UPDATE STAGE (Docs, Setup, Testing, Live)
   const updateStage = async (id: string, newStage: string) => {
     setUpdatingId(id)
-    const { error } = await supabase
-      .from('clients')
-      .update({ onboarding_stage: newStage })
-      .eq('id', id)
-
+    const { error } = await supabase.from('clients').update({ onboarding_stage: newStage }).eq('id', id)
     if (!error) {
       setClients(clients.map(c => c.id === id ? { ...c, onboarding_stage: newStage } : c))
       window.dispatchEvent(new Event('refresh-metrics'))
@@ -71,9 +76,8 @@ export default function ClientTable() {
     setUpdatingId(null)
   }
 
-  // 4. LOGIC: DELETE CLIENT
   const deleteClient = async (id: string) => {
-    if (!confirm("This will permanently wipe this record. Proceed?")) return
+    if (!confirm("Confirm: De-list this node from the global ledger?")) return
     const { error } = await supabase.from('clients').delete().eq('id', id)
     if (!error) {
       setClients(clients.filter(c => c.id !== id))
@@ -94,80 +98,104 @@ export default function ClientTable() {
   )
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center py-20 space-y-4">
-      <Loader2 className="animate-spin text-blue-500" size={24} />
-      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600">Syncing_Ledger...</span>
+    <div className="flex flex-col items-center justify-center py-32 space-y-4">
+      <div className="relative">
+        <Loader2 className="animate-spin text-blue-500" size={32} strokeWidth={1} />
+        <Cpu className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-blue-500/30" size={12} />
+      </div>
+      <span className="text-[9px] font-black uppercase tracking-[0.5em] text-gray-700 animate-pulse">Syncing_Active_Nodes...</span>
     </div>
   )
 
   return (
-    <div className="space-y-6">
-      {/* SEARCH BAR - INDUSTRIAL STYLE */}
-      <div className="relative group max-w-md">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-700 group-focus-within:text-blue-500 transition-colors" size={14} />
-        <Input 
-          placeholder="FILTER BY IDENTITY OR ENDPOINT..." 
-          className="bg-white/[0.02] border-white/10 rounded-none pl-12 h-12 text-[10px] tracking-widest text-white uppercase placeholder:text-gray-800 focus:border-blue-500/50 transition-all"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-700">
+      
+      {/* HUD: TOP COMMAND BAR */}
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+        <div className="relative group w-full md:w-96">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-700 group-focus-within:text-blue-500 transition-colors" size={14} />
+          <Input 
+            placeholder="SEARCH_IDENTITY_REF..." 
+            className="bg-white/[0.02] border-white/10 rounded-none pl-12 h-11 text-[10px] tracking-widest text-white uppercase placeholder:text-gray-800 focus:border-blue-500/30 transition-all font-mono"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        {/* SYSTEM CAPACITY TRACKER */}
+        <div className="flex items-center gap-4 bg-white/[0.02] border border-white/5 p-2 pr-4 h-11">
+          <div className="flex flex-col items-end px-3 border-r border-white/5">
+            <span className="text-[8px] font-bold text-gray-600 uppercase tracking-widest">Active_Nodes</span>
+            <span className={`text-[11px] font-black ${clients.length >= CLIENT_LIMIT && !userIsPro ? 'text-red-500' : 'text-blue-400'}`}>
+              {clients.length} <span className="text-[8px] text-gray-700 mx-1">/</span> {userIsPro ? '∞' : CLIENT_LIMIT}
+            </span>
+          </div>
+          {!userIsPro && (
+            <Button 
+              onClick={() => navigate('/dashboard/billing')}
+              className="h-7 bg-blue-600 hover:bg-blue-500 text-[9px] font-black uppercase tracking-tighter px-3 rounded-none flex items-center gap-2"
+            >
+              <Zap size={10} fill="currentColor" /> Scale_Cap
+            </Button>
+          )}
+        </div>
       </div>
 
-      {/* THE TABLE */}
-      <div className="rounded-none border border-white/5 bg-[#0A0C10] overflow-hidden shadow-2xl">
+      {/* PRIMARY DATA LEDGER */}
+      <div className="rounded-none border border-white/5 bg-[#0A0C10] overflow-hidden shadow-2xl relative">
         <Table>
           <TableHeader className="bg-white/[0.02] border-b border-white/5">
             <TableRow className="border-none hover:bg-transparent">
-              <TableHead className="text-gray-600 font-black uppercase text-[9px] tracking-[0.2em] h-14 pl-6">Client Identity</TableHead>
-              <TableHead className="text-gray-600 font-black uppercase text-[9px] tracking-[0.2em]">Contact Point</TableHead>
-              <TableHead className="text-gray-600 font-black uppercase text-[9px] tracking-[0.2em]">Current Stage</TableHead>
-              <TableHead className="text-gray-600 font-black uppercase text-[9px] tracking-[0.2em]">Ops Status</TableHead>
-              <TableHead className="text-right text-gray-600 font-black uppercase text-[9px] tracking-[0.2em] pr-8">Commands</TableHead>
+              <TableHead className="text-gray-600 font-black uppercase text-[9px] tracking-[0.3em] h-14 pl-6">Entity_Header</TableHead>
+              <TableHead className="text-gray-600 font-black uppercase text-[9px] tracking-[0.3em]">Lifecycle_Stage</TableHead>
+              <TableHead className="text-gray-600 font-black uppercase text-[9px] tracking-[0.3em]">Operational_Status</TableHead>
+              <TableHead className="text-right text-gray-600 font-black uppercase text-[9px] tracking-[0.3em] pr-8">System_Commands</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredClients.map((client) => (
               <TableRow key={client.id} className="border-white/5 hover:bg-white/[0.01] transition-colors group/row">
-                <TableCell className="py-6 pl-6">
-                  <Link to={`/dashboard/clients/${client.id}`} className="group/link inline-block">
-                    <div className="font-black text-white text-xs uppercase tracking-tighter group-hover/link:text-blue-400 transition-colors flex items-center gap-2">
-                      {client.name}
-                      <ExternalLink size={10} className="opacity-0 group-hover/link:opacity-100 transition-opacity text-blue-500" />
+                {/* ENTITY INFO */}
+                <TableCell className="py-5 pl-6">
+                  <Link to={`/dashboard/clients/${client.id}`} className="group/link flex items-center gap-4">
+                    <div className="h-9 w-9 bg-blue-500/5 border border-white/5 flex items-center justify-center text-blue-500 group-hover/link:border-blue-500/50 transition-all">
+                      <Cpu size={14} />
+                    </div>
+                    <div>
+                      <div className="font-black text-white text-[11px] uppercase tracking-tighter group-hover/link:text-blue-400 transition-colors">
+                        {client.name}
+                      </div>
+                      <div className="text-[8px] text-gray-700 font-mono uppercase tracking-widest">{client.email}</div>
                     </div>
                   </Link>
-                  <div className="text-[8px] text-gray-700 font-mono mt-1 uppercase tracking-widest">
-                    ID_REF: {client.id.slice(0, 8)}
-                  </div>
-                </TableCell>
-                
-                <TableCell>
-                  <div className="text-[10px] text-gray-400 font-bold tracking-tight uppercase">{client.email}</div>
-                  <div className="text-[9px] text-gray-600 flex items-center gap-1 mt-1 font-mono">
-                    <Phone size={10} className="text-blue-900" /> {client.phone || 'NO_LINK'}
-                  </div>
                 </TableCell>
 
+                {/* ONBOARDING STAGE */}
                 <TableCell>
-                  <Badge className="bg-blue-500/5 text-blue-400 border-blue-500/20 text-[9px] font-black tracking-widest px-2 py-0.5 rounded-none border">
-                    {client.onboarding_stage || 'DOCS'}
+                  <Badge className="bg-blue-500/5 text-blue-400 border-blue-500/20 text-[8px] font-black tracking-[0.2em] px-2 py-0.5 rounded-none border uppercase">
+                    {client.onboarding_stage || 'INIT_LINK'}
                   </Badge>
                 </TableCell>
 
+                {/* OPERATIONAL STATUS */}
                 <TableCell>
                   {updatingId === client.id ? (
                     <Loader2 className="h-3 w-3 animate-spin text-blue-500" />
                   ) : (
                     <div className="flex items-center gap-2.5">
-                      <div className={`w-1 h-1 rounded-full ${
+                      <div className={`w-1.5 h-1.5 rounded-full ${
                         client.status === 'Completed' ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' :
                         client.status === 'Blocked' ? 'bg-red-500 shadow-[0_0_8px_#ef4444]' :
                         'bg-blue-500 shadow-[0_0_8px_#3b82f6]'
-                      }`} />
-                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{client.status}</span>
+                      } ${client.status === 'Blocked' ? 'animate-pulse' : ''}`} />
+                      <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">
+                        {client.status || 'ACTIVE'}
+                      </span>
                     </div>
                   )}
                 </TableCell>
 
+                {/* COMMAND ACTIONS */}
                 <TableCell className="text-right pr-8">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -176,52 +204,53 @@ export default function ClientTable() {
                       </Button>
                     </DropdownMenuTrigger>
                     
-                    <DropdownMenuContent align="end" className="bg-[#0A0C10] border-white/10 text-white shadow-2xl min-w-[200px] rounded-none p-2 font-sans">
-                      <DropdownMenuLabel className="text-gray-600 text-[8px] uppercase tracking-[0.3em] px-2 py-2">Node Controls</DropdownMenuLabel>
-                      <DropdownMenuSeparator className="bg-white/5" />
+                    <DropdownMenuContent align="end" className="bg-[#0A0C10] border-white/10 text-white shadow-2xl min-w-[200px] rounded-none p-1 border-t-2 border-t-blue-600 font-sans">
+                      <DropdownMenuLabel className="text-gray-600 text-[8px] uppercase tracking-[0.3em] px-2 py-2 text-center">Protocol_Access</DropdownMenuLabel>
                       
-                      <DropdownMenuItem asChild className="gap-3 cursor-pointer focus:bg-blue-600 focus:text-white rounded-none py-3 text-[10px] font-bold uppercase tracking-widest">
+                      <DropdownMenuItem asChild className="gap-2 cursor-pointer focus:bg-blue-600 rounded-none py-2.5 text-[9px] font-bold uppercase tracking-widest">
                         <Link to={`/dashboard/clients/${client.id}`}>
-                          <User size={14} /> Open Intel Profile
+                          <User size={12} /> Open Intel Profile
                         </Link>
                       </DropdownMenuItem>
 
                       <DropdownMenuSeparator className="bg-white/5" />
-
-                      {/* STAGE MIGRATION SECTION */}
-                      <DropdownMenuLabel className="text-gray-600 text-[8px] uppercase tracking-[0.3em] px-2 py-2">Migrate Stage</DropdownMenuLabel>
+                      
+                      {/* Lifecycle Stage Selection */}
+                      <DropdownMenuLabel className="text-gray-500 text-[7px] uppercase tracking-[0.2em] px-2 py-1.5">Lifecycle_Stage</DropdownMenuLabel>
                       {['Docs', 'Setup', 'Testing', 'Live'].map((stage) => (
                         <DropdownMenuItem 
                           key={stage} 
                           onClick={() => updateStage(client.id, stage)}
-                          className={`gap-3 cursor-pointer rounded-none text-[10px] font-bold uppercase tracking-widest py-2.5 ${client.onboarding_stage === stage ? 'text-blue-400 bg-blue-500/5' : 'text-gray-500 focus:bg-white/5'}`}
+                          className={`gap-2 cursor-pointer rounded-none text-[9px] font-bold uppercase py-2 ${client.onboarding_stage === stage ? 'text-blue-400 bg-blue-500/5' : 'hover:bg-white/5'}`}
                         >
-                          <div className={`w-1 h-1 rounded-full ${client.onboarding_stage === stage ? 'bg-blue-400 shadow-[0_0_8px_#3b82f6]' : 'bg-gray-800'}`} />
+                          <div className={`w-1 h-1 ${client.onboarding_stage === stage ? 'bg-blue-500 shadow-[0_0_5px_#3b82f6]' : 'bg-gray-800'}`} />
                           {stage}
                         </DropdownMenuItem>
                       ))}
 
                       <DropdownMenuSeparator className="bg-white/5" />
 
-                      {/* OPS STATUS SECTION */}
-                      <DropdownMenuLabel className="text-gray-600 text-[8px] uppercase tracking-[0.3em] px-2 py-2">System Status</DropdownMenuLabel>
-                      {['In Progress', 'Blocked', 'Completed'].map((stat) => (
+                      {/* Operational Status Selection */}
+                      <DropdownMenuLabel className="text-gray-500 text-[7px] uppercase tracking-[0.2em] px-2 py-1.5">System_Status</DropdownMenuLabel>
+                      {[
+                        { label: 'In Progress', color: 'bg-blue-500' },
+                        { label: 'Blocked', color: 'bg-red-500' },
+                        { label: 'Completed', color: 'bg-green-500' }
+                      ].map((status) => (
                         <DropdownMenuItem 
-                          key={stat}
-                          onClick={() => updateStatus(client.id, stat)}
-                          className="gap-3 cursor-pointer text-[10px] font-bold uppercase tracking-widest text-gray-500 focus:bg-white/5 py-2.5"
+                          key={status.label} 
+                          onClick={() => updateStatus(client.id, status.label)}
+                          className={`gap-2 cursor-pointer rounded-none text-[9px] font-bold uppercase py-2 ${client.status === status.label ? 'text-white bg-white/5 font-black' : 'text-gray-500 hover:bg-white/5'}`}
                         >
-                          <div className={`w-1.5 h-1.5 rounded-full ${
-                            stat === 'Completed' ? 'bg-green-500' : stat === 'Blocked' ? 'bg-red-500' : 'bg-blue-500'
-                          }`} />
-                          {stat}
+                          <div className={`w-1.5 h-1.5 rounded-full ${status.color} ${client.status === status.label ? 'animate-pulse' : 'opacity-30'}`} />
+                          {status.label}
                         </DropdownMenuItem>
                       ))}
                       
                       <DropdownMenuSeparator className="bg-white/5" />
                       
-                      <DropdownMenuItem onClick={() => deleteClient(client.id)} className="gap-3 cursor-pointer text-gray-600 focus:bg-red-600 focus:text-white py-3 text-[10px] font-bold uppercase tracking-widest transition-colors">
-                        <Archive size={14} /> Wipe Record
+                      <DropdownMenuItem onClick={() => deleteClient(client.id)} className="gap-2 cursor-pointer text-gray-600 focus:bg-red-900 focus:text-white py-2.5 text-[9px] font-bold uppercase">
+                        <Archive size={12} /> De-list Node
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -231,9 +260,11 @@ export default function ClientTable() {
           </TableBody>
         </Table>
 
+        {/* EMPTY STATE */}
         {filteredClients.length === 0 && (
-          <div className="text-center py-32 bg-[#0A0C10]">
-             <p className="text-gray-800 text-[10px] font-black tracking-[0.5em] uppercase">No_Data_Streams_Detected</p>
+          <div className="text-center py-32 bg-white/[0.01] border-t border-white/5">
+             <Activity className="mx-auto text-gray-900 mb-4 animate-pulse" size={24} />
+             <p className="text-gray-800 text-[9px] font-black tracking-[0.5em] uppercase">No_Active_Signals_Detected</p>
           </div>
         )}
       </div>
