@@ -35,7 +35,7 @@ export default function Landing() {
             
             <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-[0.85]">
               ONBOARDING <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 text-5xl md:text-7xl">AS INFRASTRUCTURE.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 text-3xl md:text-7xl">AS INFRASTRUCTURE.</span>
             </h1>
             
             <p className="text-xl text-gray-500 max-w-lg leading-relaxed font-medium">
@@ -50,7 +50,7 @@ export default function Landing() {
               </Button>
               <div className="flex flex-col justify-center">
                 <span className="text-[9px] font-bold text-gray-700 uppercase tracking-widest">Current Status:</span>
-                <span className="text-[10px] font-black text-white uppercase tracking-tighter">v1.0.4 Staging Live</span>
+                <span className="text-[10px] font-black text-white uppercase tracking-tighter">v1 Staging Live</span>
               </div>
             </div>
           </div>
